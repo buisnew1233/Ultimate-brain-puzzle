@@ -1,3 +1,1190 @@
-git remote add origin https://github.com/buisnew1233/Ultimate-brain-puzzle.git
-git branch -M main
-git push -u origin main
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory + Number Game</title>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: linear-gradient(to bottom, #f0f8ff, #a0d8ef);
+  margin: 0;
+  padding: 20px;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  gap: 5px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background: #87cefa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 10px;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+.cell.correct { background: #32cd32; color:white; }
+
+#controls {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  background-color: #ffa500;
+  color: white;
+  margin-left: 5px;
+}
+</style>
+</head>
+<body>
+<h2>Memory Game</h2>
+<div id="grid"></div>
+<div id="controls">
+  Score: <span id="score">0</span> |
+  Timer: <span id="timer">0</span>s
+  <button id="hint-btn">Hint</button>
+</div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+
+<script>
+window.onload = function(){
+  const grid = document.getElementById('grid');
+  const scoreText = document.getElementById('score');
+  const timerText = document.getElementById('timer');
+  const hintBtn = document.getElementById('hint-btn');
+  const nextBtn = document.getElementById('next-level-btn');
+
+  let score = 0;
+  let timer = 0;
+  let timerInterval;
+  let numbers = [1,2,3,4,5,6,7,8,9];
+  let userInput = [];
+
+  // Display numbers for 2 seconds
+  numbers.forEach(num=>{
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    cell.textContent = num;
+    grid.appendChild(cell);
+  });
+
+  setTimeout(()=>{
+    document.querySelectorAll('.cell').forEach(c=>c.textContent='');
+
+    const cells = document.querySelectorAll('.cell');
+
+    // Start timer
+    timer = 0;
+    timerText.textContent = timer;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{ timer++; timerText.textContent = timer; }, 1000);
+
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click', function handler(){
+        if(userInput.length < numbers.length){
+          cell.textContent = numbers[index];
+          cell.classList.add('correct');
+          userInput.push(numbers[index]);
+          score += 10;
+          scoreText.textContent = score;
+
+          if(userInput.length === numbers.length){
+            clearInterval(timerInterval);
+            nextBtn.style.display = 'block';
+          }
+        }
+      }, {once:true});
+    });
+
+  }, 2000);
+
+  // Hint button
+  hintBtn.addEventListener('click', ()=>{
+    if(userInput.length < numbers.length){
+      const cell = document.querySelectorAll('.cell')[userInput.length];
+      cell.textContent = numbers[userInput.length];
+      cell.classList.add('correct');
+      userInput.push(numbers[userInput.length]);
+      score += 5;
+      scoreText.textContent = score;
+
+      if(userInput.length === numbers.length){
+        clearInterval(timerInterval);
+        nextBtn.style.display = 'block';
+      }
+    }
+  });
+
+  // Next Level (reload simple for mobile test)
+  nextBtn.addEventListener('click', ()=>{
+    location.reload();
+  });
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Advanced</title>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: linear-gradient(to bottom, #f0f8ff, #a0d8ef);
+  margin: 0;
+  padding: 20px;
+}
+h2 { margin:10px 0; }
+#grid {
+  display: grid;
+  gap: 5px;
+  justify-content: center;
+  margin: 20px 0;
+}
+.cell {
+  width: 60px;
+  height: 60px;
+  background: #87cefa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 10px;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+.cell.correct { background: #32cd32; color:white; }
+#controls { margin-bottom: 10px; font-size:16px; }
+button {
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  background-color: #ffa500;
+  color: white;
+  margin-left: 5px;
+}
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s
+<button id="hint-btn">Hint</button>
+</div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+
+<script>
+window.onload = function(){
+  const grid = document.getElementById('grid');
+  const scoreText = document.getElementById('score');
+  const timerText = document.getElementById('timer');
+  const hintBtn = document.getElementById('hint-btn');
+  const nextBtn = document.getElementById('next-level-btn');
+  const levelText = document.getElementById('level');
+
+  let score = 0, level = 1, timer = 0, timerInterval;
+  let numbers = [], userInput = [];
+
+  function startLevel(){
+    grid.innerHTML = '';
+    userInput = [];
+    numbers = [];
+    let gridSize = 2 + level; // level 1 → 3x3, level 2 → 4x4 ...
+    for(let i=1;i<=gridSize*gridSize;i++){ numbers.push(i); }
+    numbers.sort(()=>Math.random()-0.5);
+
+    grid.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
+
+    numbers.forEach(num=>{
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.textContent = num;
+      grid.appendChild(cell);
+    });
+
+    nextBtn.style.display = 'none';
+    timer = 0; timerText.textContent = timer;
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{ timer++; timerText.textContent=timer; },1000);
+
+    setTimeout(()=>{
+      document.querySelectorAll('.cell').forEach(c=>c.textContent='');
+      addCellEvents();
+    }, 2000);
+  }
+
+  function addCellEvents(){
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click', function handler(){
+        if(userInput.length < numbers.length){
+          cell.textContent = numbers[index];
+          cell.classList.add('correct');
+          userInput.push(numbers[index]);
+          score += 10;
+          scoreText.textContent = score;
+
+          if(userInput.length === numbers.length){
+            clearInterval(timerInterval);
+            nextBtn.style.display = 'block';
+          }
+        }
+      }, {once:true});
+    });
+  }
+
+  hintBtn.addEventListener('click', ()=>{
+    if(userInput.length < numbers.length){
+      const cell = document.querySelectorAll('.cell')[userInput.length];
+      cell.textContent = numbers[userInput.length];
+      cell.classList.add('correct');
+      userInput.push(numbers[userInput.length]);
+      score += 5;
+      scoreText.textContent = score;
+
+      if(userInput.length === numbers.length){
+        clearInterval(timerInterval);
+        nextBtn.style.display = 'block';
+      }
+    }
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    level++;
+    levelText.textContent = level;
+    startLevel();
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Advanced</title>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: linear-gradient(to bottom, #f0f8ff, #a0d8ef);
+  margin: 0; padding: 20px;
+}
+h2 { margin:10px 0; }
+#grid {
+  display: grid;
+  gap: 5px;
+  justify-content: center;
+  margin: 20px 0;
+}
+.cell {
+  width: 60px; height: 60px;
+  background: #87cefa;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 24px; cursor: pointer;
+  border-radius: 10px;
+  user-select: none;
+  perspective: 600px;
+}
+.cell-inner {
+  width:100%; height:100%;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+.cell.flip .cell-inner { transform: rotateY(180deg); }
+.cell-front, .cell-back {
+  position: absolute; width:100%; height:100%;
+  backface-visibility: hidden; display:flex;
+  justify-content:center; align-items:center;
+  border-radius:10px;
+}
+.cell-front { background:#87cefa; }
+.cell-back { background:#32cd32; color:white; transform:rotateY(180deg); }
+#controls { margin-bottom: 10px; font-size:16px; }
+button {
+  padding:5px 10px; font-size:16px;
+  border-radius:5px; border:none;
+  background-color:#ffa500; color:white;
+  margin-left:5px;
+}
+.stars { margin-top:10px; font-size:20px; color:gold; }
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s
+<button id="hint-btn">Hint</button>
+</div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+<div class="stars" id="stars"></div>
+
+<audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+window.onload = function(){
+  const grid = document.getElementById('grid');
+  const scoreText = document.getElementById('score');
+  const timerText = document.getElementById('timer');
+  const hintBtn = document.getElementById('hint-btn');
+  const nextBtn = document.getElementById('next-level-btn');
+  const levelText = document.getElementById('level');
+  const starsDiv = document.getElementById('stars');
+
+  const correctSound = document.getElementById('correct-sound');
+  const wrongSound = document.getElementById('wrong-sound');
+
+  let score = 0, level = 1, timer = 0, timerInterval;
+  let numbers=[], userInput=[];
+
+  function playSound(correct=true){
+    if(correct) correctSound.play();
+    else wrongSound.play();
+  }
+
+  function startLevel(){
+    grid.innerHTML=''; userInput=[];
+    starsDiv.innerHTML='';
+    let gridSize = 2 + level; // Level 1 → 3x3, Level 2 → 4x4...
+    for(let i=1;i<=gridSize*gridSize;i++) numbers.push(i);
+    numbers.sort(()=>Math.random()-0.5);
+
+    grid.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
+
+    numbers.forEach(num=>{
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.innerHTML = `<div class="cell-inner">
+        <div class="cell-front"></div>
+        <div class="cell-back">${num}</div>
+      </div>`;
+      grid.appendChild(cell);
+    });
+
+    nextBtn.style.display='none';
+    timer=0; timerText.textContent=timer;
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{timer++; timerText.textContent=timer;},1000);
+
+    setTimeout(()=>{document.querySelectorAll('.cell-back').forEach(c=>c.parentElement.parentElement.classList.remove('flip')) ; addCellEvents();},2000);
+  }
+
+  function addCellEvents(){
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click', function handler(){
+        if(userInput.length<numbers.length){
+          cell.classList.add('flip');
+          userInput.push(numbers[index]);
+          playSound(true);
+          score+=10; scoreText.textContent=score;
+          if(userInput.length===numbers.length){
+            clearInterval(timerInterval);
+            showStars();
+            nextBtn.style.display='block';
+          }
+        }
+      },{once:true});
+    });
+  }
+
+  function showStars(){
+    let starCount= Math.min(3, Math.max(1, 30-Math.floor(timer/2)));
+    starsDiv.innerHTML='★'.repeat(starCount);
+  }
+
+  hintBtn.addEventListener('click', ()=>{
+    if(userInput.length<numbers.length){
+      const cell = document.querySelectorAll('.cell')[userInput.length];
+      cell.classList.add('flip');
+      userInput.push(numbers[userInput.length]);
+      score+=5; scoreText.textContent=score;
+      playSound(true);
+      if(userInput.length===numbers.length){
+        clearInterval(timerInterval);
+        showStars();
+        nextBtn.style.display='block';
+      }
+    }
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    level++; levelText.textContent=level; numbers=[];
+    startLevel();
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Ultimate</title>
+<style>
+body {
+  font-family: Arial; text-align:center;
+  background:linear-gradient(to bottom,#f0f8ff,#a0d8ef);
+  margin:0; padding:20px;
+}
+h2 { margin:10px 0; }
+#grid {
+  display:grid; gap:5px; justify-content:center; margin:20px 0;
+}
+.cell {
+  width:60px; height:60px;
+  background:#87cefa; display:flex;
+  justify-content:center; align-items:center;
+  font-size:24px; cursor:pointer; border-radius:10px;
+  user-select:none; perspective:600px;
+}
+.cell-inner {
+  width:100%; height:100%;
+  transition: transform 0.5s; transform-style:preserve-3d; position:relative;
+}
+.cell.flip .cell-inner { transform:rotateY(180deg); }
+.cell-front, .cell-back {
+  position:absolute; width:100%; height:100%;
+  backface-visibility:hidden; display:flex;
+  justify-content:center; align-items:center; border-radius:10px;
+}
+.cell-front { background:#87cefa; }
+.cell-back { background:#32cd32; color:white; transform:rotateY(180deg); }
+#controls { margin-bottom:10px; font-size:16px; }
+button { padding:5px 10px; font-size:16px; border-radius:5px; border:none; background:#ffa500; color:white; margin-left:5px; }
+.stars { margin-top:10px; font-size:20px; color:gold; }
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s | Hint left: <span id="hint-left">3</span>
+<button id="hint-btn">Hint</button>
+</div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+<div class="stars" id="stars"></div>
+
+<audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+window.onload = function(){
+  const grid=document.getElementById('grid');
+  const scoreText=document.getElementById('score');
+  const timerText=document.getElementById('timer');
+  const hintBtn=document.getElementById('hint-btn');
+  const nextBtn=document.getElementById('next-level-btn');
+  const levelText=document.getElementById('level');
+  const starsDiv=document.getElementById('stars');
+  const hintLeftSpan=document.getElementById('hint-left');
+
+  const correctSound=document.getElementById('correct-sound');
+  const wrongSound=document.getElementById('wrong-sound');
+
+  let score=0, level=1, timer=0, timerInterval;
+  let numbers=[], userInput=[], hintLeft=3;
+
+  function vibrate(duration=50){ if(navigator.vibrate) navigator.vibrate(duration); }
+
+  function playSound(correct=true){ if(correct) correctSound.play(); else wrongSound.play(); }
+
+  function startLevel(){
+    grid.innerHTML=''; userInput=[]; numbers=[]; starsDiv.innerHTML='';
+    hintLeft=3; hintLeftSpan.textContent=hintLeft;
+    let gridSize=2+level; // Level 1 → 3x3
+    for(let i=1;i<=gridSize*gridSize;i++) numbers.push(i);
+    numbers.sort(()=>Math.random()-0.5);
+    grid.style.gridTemplateColumns=`repeat(${gridSize},60px)`;
+
+    numbers.forEach(num=>{
+      const cell=document.createElement('div'); cell.classList.add('cell');
+      cell.innerHTML=`<div class="cell-inner">
+        <div class="cell-front"></div>
+        <div class="cell-back">${num}</div>
+      </div>`;
+      grid.appendChild(cell);
+    });
+
+    nextBtn.style.display='none';
+    timer=0; timerText.textContent=timer;
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{timer++; timerText.textContent=timer;},1000);
+
+    setTimeout(()=>{document.querySelectorAll('.cell').forEach(c=>c.classList.remove('flip')); addCellEvents();},2000);
+  }
+
+  function addCellEvents(){
+    const cells=document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click', function handler(){
+        if(userInput.length<numbers.length){
+          cell.classList.add('flip'); userInput.push(numbers[index]);
+          score+=10; scoreText.textContent=score;
+          playSound(true); vibrate(30);
+          if(userInput.length===numbers.length){ clearInterval(timerInterval); showStars(); nextBtn.style.display='block'; }
+        } else { playSound(false); vibrate(100); }
+      },{once:true});
+    });
+  }
+
+  function showStars(){
+    let starCount=Math.min(3,Math.max(1,30-Math.floor(timer/2)));
+    starsDiv.innerHTML='★'.repeat(starCount);
+  }
+
+  hintBtn.addEventListener('click', ()=>{
+    if(hintLeft>0 && userInput.length<numbers.length){
+      const cell=document.querySelectorAll('.cell')[userInput.length];
+      cell.classList.add('flip'); userInput.push(numbers[userInput.length]);
+      score+=5; scoreText.textContent=score;
+      playSound(true); vibrate(50);
+      hintLeft--; hintLeftSpan.textContent=hintLeft;
+      if(userInput.length===numbers.length){ clearInterval(timerInterval); showStars(); nextBtn.style.display='block'; }
+    } else { vibrate(100); playSound(false); }
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    level++; levelText.textContent=level; numbers=[];
+    startLevel();
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Ultimate + High Score</title>
+<style>
+body {
+  font-family: Arial; text-align:center;
+  background:linear-gradient(to bottom,#f0f8ff,#a0d8ef);
+  margin:0; padding:20px;
+}
+h2 { margin:10px 0; }
+#grid { display:grid; gap:5px; justify-content:center; margin:20px 0; }
+.cell { width:60px; height:60px; background:#87cefa; display:flex; justify-content:center; align-items:center; font-size:24px; cursor:pointer; border-radius:10px; user-select:none; perspective:600px; }
+.cell-inner { width:100%; height:100%; transition: transform 0.5s; transform-style:preserve-3d; position:relative; }
+.cell.flip .cell-inner { transform:rotateY(180deg); }
+.cell-front, .cell-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; display:flex; justify-content:center; align-items:center; border-radius:10px; }
+.cell-front { background:#87cefa; }
+.cell-back { background:#32cd32; color:white; transform:rotateY(180deg); }
+#controls { margin-bottom:10px; font-size:16px; }
+button { padding:5px 10px; font-size:16px; border-radius:5px; border:none; background:#ffa500; color:white; margin-left:5px; }
+.stars { margin-top:10px; font-size:20px; color:gold; }
+#highscore { margin-top:5px; font-size:16px; color:#333; }
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s | Hint left: <span id="hint-left">3</span>
+<button id="hint-btn">Hint</button>
+</div>
+<div id="highscore">High Score: <span id="highscore-val">0</span></div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+<div class="stars" id="stars"></div>
+
+<audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+window.onload = function(){
+  const grid=document.getElementById('grid');
+  const scoreText=document.getElementById('score');
+  const timerText=document.getElementById('timer');
+  const hintBtn=document.getElementById('hint-btn');
+  const nextBtn=document.getElementById('next-level-btn');
+  const levelText=document.getElementById('level');
+  const starsDiv=document.getElementById('stars');
+  const hintLeftSpan=document.getElementById('hint-left');
+  const highscoreVal=document.getElementById('highscore-val');
+
+  const correctSound=document.getElementById('correct-sound');
+  const wrongSound=document.getElementById('wrong-sound');
+
+  let score=0, level=1, timer=0, timerInterval;
+  let numbers=[], userInput=[], hintLeft=3;
+
+  function vibrate(duration=50){ if(navigator.vibrate) navigator.vibrate(duration); }
+  function playSound(correct=true){ if(correct) correctSound.play(); else wrongSound.play(); }
+  function getHighScore(level){ return localStorage.getItem('memory_high_'+level) || 0; }
+  function setHighScore(level,score){ localStorage.setItem('memory_high_'+level,score); }
+
+  function startLevel(){
+    grid.innerHTML=''; userInput=[]; numbers=[]; starsDiv.innerHTML='';
+    hintLeft=3; hintLeftSpan.textContent=hintLeft;
+    let gridSize=2+level;
+    for(let i=1;i<=gridSize*gridSize;i++) numbers.push(i);
+    numbers.sort(()=>Math.random()-0.5);
+    grid.style.gridTemplateColumns=`repeat(${gridSize},60px)`;
+
+    numbers.forEach(num=>{
+      const cell=document.createElement('div'); cell.classList.add('cell');
+      cell.innerHTML=`<div class="cell-inner">
+        <div class="cell-front"></div>
+        <div class="cell-back">${num}</div>
+      </div>`;
+      grid.appendChild(cell);
+    });
+
+    nextBtn.style.display='none';
+    timer=0; timerText.textContent=timer;
+    scoreText.textContent=score;
+    highscoreVal.textContent=getHighScore(level);
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{timer++; timerText.textContent=timer;},1000);
+
+    setTimeout(()=>{document.querySelectorAll('.cell').forEach(c=>c.classList.remove('flip')); addCellEvents();},2000);
+  }
+
+  function addCellEvents(){
+    const cells=document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click', function handler(){
+        if(userInput.length<numbers.length){
+          cell.classList.add('flip'); userInput.push(numbers[index]);
+          score+=10; scoreText.textContent=score;
+          playSound(true); vibrate(30);
+          if(userInput.length===numbers.length){
+            clearInterval(timerInterval);
+            showStars();
+            if(score>getHighScore(level)) setHighScore(level,score);
+            highscoreVal.textContent=getHighScore(level);
+            nextBtn.style.display='block';
+          }
+        } else { playSound(false); vibrate(100); }
+      },{once:true});
+    });
+  }
+
+  function showStars(){
+    let starCount=Math.min(3,Math.max(1,30-Math.floor(timer/2)));
+    starsDiv.innerHTML='★'.repeat(starCount);
+  }
+
+  hintBtn.addEventListener('click', ()=>{
+    if(hintLeft>0 && userInput.length<numbers.length){
+      const cell=document.querySelectorAll('.cell')[userInput.length];
+      cell.classList.add('flip'); userInput.push(numbers[userInput.length]);
+      score+=5; scoreText.textContent=score;
+      playSound(true); vibrate(50);
+      hintLeft--; hintLeftSpan.textContent=hintLeft;
+      if(userInput.length===numbers.length){
+        clearInterval(timerInterval);
+        showStars();
+        if(score>getHighScore(level)) setHighScore(level,score);
+        highscoreVal.textContent=getHighScore(level);
+        nextBtn.style.display='block';
+      }
+    } else { vibrate(100); playSound(false); }
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    level++; levelText.textContent=level; numbers=[];
+    startLevel();
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Pro</title>
+<style>
+body { font-family: Arial; text-align:center; background:linear-gradient(to bottom,#f0f8ff,#a0d8ef); margin:0; padding:20px; }
+h2 { margin:10px 0; }
+#grid { display:grid; gap:5px; justify-content:center; margin:20px 0; }
+.cell { width:60px; height:60px; background:#87cefa; display:flex; justify-content:center; align-items:center; font-size:24px; cursor:pointer; border-radius:10px; user-select:none; perspective:600px; transition:transform 0.1s; }
+.cell:active { transform: scale(0.95); }
+.cell-inner { width:100%; height:100%; transition: transform 0.5s; transform-style:preserve-3d; position:relative; }
+.cell.flip .cell-inner { transform:rotateY(180deg); }
+.cell-front, .cell-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; display:flex; justify-content:center; align-items:center; border-radius:10px; }
+.cell-front { background:#87cefa; }
+.cell-back { background:#32cd32; color:white; transform:rotateY(180deg); }
+#controls { margin-bottom:10px; font-size:16px; }
+button { padding:5px 10px; font-size:16px; border-radius:5px; border:none; background:#ffa500; color:white; margin-left:5px; }
+.stars { margin-top:10px; font-size:20px; color:gold; }
+#highscore { margin-top:5px; font-size:16px; color:#333; }
+#popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; }
+#popup-content { background:white; padding:20px; border-radius:10px; text-align:center; }
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s | Hint left: <span id="hint-left">3</span>
+<button id="hint-btn">Hint</button>
+</div>
+<div id="highscore">High Score: <span id="highscore-val">0</span> | Total: <span id="total-high">0</span></div>
+<div class="stars" id="stars"></div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+
+<div id="popup">
+  <div id="popup-content">
+    <h3>Level Complete!</h3>
+    <p>Score: <span id="popup-score">0</span></p>
+    <p>Stars: <span id="popup-stars">★</span></p>
+    <button id="popup-next">Next Level</button>
+  </div>
+</div>
+
+<audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+window.onload = function(){
+  const grid=document.getElementById('grid');
+  const scoreText=document.getElementById('score');
+  const timerText=document.getElementById('timer');
+  const hintBtn=document.getElementById('hint-btn');
+  const nextBtn=document.getElementById('next-level-btn');
+  const levelText=document.getElementById('level');
+  const starsDiv=document.getElementById('stars');
+  const hintLeftSpan=document.getElementById('hint-left');
+  const highscoreVal=document.getElementById('highscore-val');
+  const totalHigh=document.getElementById('total-high');
+  const popup=document.getElementById('popup');
+  const popupScore=document.getElementById('popup-score');
+  const popupStars=document.getElementById('popup-stars');
+  const popupNext=document.getElementById('popup-next');
+
+  const correctSound=document.getElementById('correct-sound');
+  const wrongSound=document.getElementById('wrong-sound');
+
+  let score=0, level=1, timer=0, timerInterval;
+  let numbers=[], userInput=[], hintLeft=3;
+
+  function vibrate(duration=50){ if(navigator.vibrate) navigator.vibrate(duration); }
+  function playSound(correct=true){ if(correct) correctSound.play(); else wrongSound.play(); }
+
+  function getHighScore(level){ return parseInt(localStorage.getItem('memory_high_'+level))||0; }
+  function setHighScore(level,score){ localStorage.setItem('memory_high_'+level,score); }
+  function getTotalHigh(){ return parseInt(localStorage.getItem('memory_total_high'))||0; }
+  function setTotalHigh(score){ localStorage.setItem('memory_total_high',score); totalHigh.textContent=score; }
+
+  function startLevel(){
+    grid.innerHTML=''; userInput=[]; numbers=[]; starsDiv.innerHTML=''; popup.style.display='none';
+    hintLeft=3; hintLeftSpan.textContent=hintLeft;
+    let gridSize=2+level; for(let i=1;i<=gridSize*gridSize;i++) numbers.push(i);
+    numbers.sort(()=>Math.random()-0.5); grid.style.gridTemplateColumns=`repeat(${gridSize},60px)`;
+    numbers.forEach(num=>{ const cell=document.createElement('div'); cell.classList.add('cell');
+      cell.innerHTML=`<div class="cell-inner"><div class="cell-front"></div><div class="cell-back">${num}</div></div>`;
+      grid.appendChild(cell);
+    });
+    nextBtn.style.display='none'; timer=0; timerText.textContent=timer; scoreText.textContent=score;
+    highscoreVal.textContent=getHighScore(level); totalHigh.textContent=getTotalHigh();
+    clearInterval(timerInterval); timerInterval=setInterval(()=>{timer++; timerText.textContent=timer;},1000);
+    setTimeout(()=>{document.querySelectorAll('.cell').forEach(c=>c.classList.remove('flip')); addCellEvents();},2000);
+  }
+
+  function addCellEvents(){
+    const cells=document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click',function handler(){
+        if(userInput.length<numbers.length){
+          cell.classList.add('flip'); userInput.push(numbers[index]); score+=10;
+          scoreText.textContent=score; playSound(true); vibrate(30);
+          if(userInput.length===numbers.length){ clearInterval(timerInterval); showStars(); showPopup(); }
+        } else { playSound(false); vibrate(100); }
+      },{once:true});
+    });
+  }
+
+  function showStars(){ 
+    let starCount=Math.min(3,Math.max(1,30-Math.floor(timer/2))); 
+    starsDiv.innerHTML='★'.repeat(starCount); 
+    popupStars.textContent='★'.repeat(starCount);
+  }
+
+  function showPopup(){
+    popup.style.display='flex'; popupScore.textContent=score;
+    if(score>getHighScore(level)) setHighScore(level,score);
+    let total=getTotalHigh(); if(score>total) setTotalHigh(score);
+  }
+
+  hintBtn.addEventListener('click',()=>{
+    if(hintLeft>0 && userInput.length<numbers.length){
+      const cell=document.querySelectorAll('.cell')[userInput.length];
+      cell.classList.add('flip'); userInput.push(numbers[userInput.length]);
+      score+=5; scoreText.textContent=score; playSound(true); vibrate(50);
+      hintLeft--; hintLeftSpan.textContent=hintLeft;
+      if(userInput.length===numbers.length){ clearInterval(timerInterval); showStars(); showPopup(); }
+    } else { vibrate(100); playSound(false); }
+  });
+
+  popupNext.addEventListener('click',()=>{
+    level++; levelText.textContent=level; numbers=[];
+    startLevel();
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Ultimate Pro</title>
+<style>
+body { font-family: Arial; text-align:center; background:linear-gradient(to bottom,#f0f8ff,#a0d8ef); margin:0; padding:20px; }
+h2 { margin:10px 0; }
+#grid { display:grid; gap:5px; justify-content:center; margin:20px 0; }
+.cell { width:60px; height:60px; background:#87cefa; display:flex; justify-content:center; align-items:center; font-size:24px; cursor:pointer; border-radius:10px; user-select:none; perspective:600px; transition:transform 0.1s, box-shadow 0.2s; }
+.cell:active { transform: scale(0.95); }
+.cell.flash { box-shadow: 0 0 10px yellow; }
+.cell-inner { width:100%; height:100%; transition: transform 0.5s; transform-style:preserve-3d; position:relative; }
+.cell.flip .cell-inner { transform:rotateY(180deg); }
+.cell-front, .cell-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; display:flex; justify-content:center; align-items:center; border-radius:10px; }
+.cell-front { background:#87cefa; }
+.cell-back { background:#32cd32; color:white; transform:rotateY(180deg); }
+#controls { margin-bottom:10px; font-size:16px; }
+button { padding:5px 10px; font-size:16px; border-radius:5px; border:none; background:#ffa500; color:white; margin-left:5px; }
+.stars { margin-top:10px; font-size:20px; color:gold; }
+#highscore { margin-top:5px; font-size:16px; color:#333; }
+#popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; }
+#popup-content { background:white; padding:20px; border-radius:10px; text-align:center; }
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s | Hint left: <span id="hint-left">3</span>
+<button id="hint-btn">Hint</button>
+</div>
+<div id="highscore">High Score: <span id="highscore-val">0</span> | Total: <span id="total-high">0</span></div>
+<div class="stars" id="stars"></div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+
+<div id="popup">
+  <div id="popup-content">
+    <h3 id="popup-title">Level Complete!</h3>
+    <p>Score: <span id="popup-score">0</span></p>
+    <p>Stars: <span id="popup-stars">★</span></p>
+    <button id="popup-next">Next Level</button>
+  </div>
+</div>
+
+<audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+window.onload=function(){
+  const grid=document.getElementById('grid');
+  const scoreText=document.getElementById('score');
+  const timerText=document.getElementById('timer');
+  const hintBtn=document.getElementById('hint-btn');
+  const nextBtn=document.getElementById('next-level-btn');
+  const levelText=document.getElementById('level');
+  const starsDiv=document.getElementById('stars');
+  const hintLeftSpan=document.getElementById('hint-left');
+  const highscoreVal=document.getElementById('highscore-val');
+  const totalHigh=document.getElementById('total-high');
+  const popup=document.getElementById('popup');
+  const popupScore=document.getElementById('popup-score');
+  const popupStars=document.getElementById('popup-stars');
+  const popupTitle=document.getElementById('popup-title');
+  const popupNext=document.getElementById('popup-next');
+
+  const correctSound=document.getElementById('correct-sound');
+  const wrongSound=document.getElementById('wrong-sound');
+
+  let score=0, level=1, timer=0, timerInterval;
+  let numbers=[], userInput=[], hintLeft=3;
+  let levelTime=30;
+
+  function vibrate(duration=50){ if(navigator.vibrate) navigator.vibrate(duration); }
+  function playSound(correct=true){ if(correct) correctSound.play(); else wrongSound.play(); }
+
+  function getHighScore(level){ return parseInt(localStorage.getItem('memory_high_'+level))||0; }
+  function setHighScore(level,score){ localStorage.setItem('memory_high_'+level,score); }
+  function getTotalHigh(){ return parseInt(localStorage.getItem('memory_total_high'))||0; }
+  function setTotalHigh(score){ localStorage.setItem('memory_total_high',score); totalHigh.textContent=score; }
+
+  function startLevel(){
+    grid.innerHTML=''; userInput=[]; numbers=[]; starsDiv.innerHTML=''; popup.style.display='none';
+    hintLeft=3; hintLeftSpan.textContent=hintLeft; levelTime=30+level*5;
+    timer=levelTime; timerText.textContent=timer;
+    let gridSize=2+level; for(let i=1;i<=gridSize*gridSize;i++) numbers.push(i);
+    numbers.sort(()=>Math.random()-0.5); grid.style.gridTemplateColumns=`repeat(${gridSize},60px)`;
+    numbers.forEach(num=>{ const cell=document.createElement('div'); cell.classList.add('cell');
+      cell.innerHTML=`<div class="cell-inner"><div class="cell-front"></div><div class="cell-back">${num}</div></div>`;
+      grid.appendChild(cell);
+    });
+    nextBtn.style.display='none'; scoreText.textContent=score; highscoreVal.textContent=getHighScore(level); totalHigh.textContent=getTotalHigh();
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{
+      timer--; timerText.textContent=timer;
+      if(timer<=0){ clearInterval(timerInterval); levelFail(); }
+    },1000);
+    setTimeout(()=>{document.querySelectorAll('.cell').forEach(c=>c.classList.remove('flip')); addCellEvents();},2000);
+  }
+
+  function addCellEvents(){
+    const cells=document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click',function handler(){
+        if(userInput.length<numbers.length){
+          cell.classList.add('flip'); cell.classList.add('flash');
+          setTimeout(()=>cell.classList.remove('flash'),200);
+          userInput.push(numbers[index]); score+=10; scoreText.textContent=score;
+          playSound(true); vibrate(30);
+          if(userInput.length===numbers.length){ clearInterval(timerInterval); levelComplete(); }
+        } else { playSound(false); vibrate(100); }
+      },{once:true});
+    });
+  }
+
+  function levelComplete(){
+    let bonus=Math.floor(timer*2); score+=bonus; scoreText.textContent=score;
+    let starCount=Math.min(3,Math.max(1,30-Math.floor((levelTime-timer)/2)));
+    starsDiv.innerHTML='★'.repeat(starCount); popupStars.textContent='★'.repeat(starCount);
+    popupScore.textContent=score; popupTitle.textContent='Level Complete! Bonus: '+bonus;
+    if(score>getHighScore(level)) setHighScore(level,score);
+    if(score>getTotalHigh()) setTotalHigh(score);
+    popup.style.display='flex';
+  }
+
+  function levelFail(){
+    popupTitle.textContent='Time Up! Level Failed'; popupScore.textContent=score; popupStars.textContent='';
+    popup.style.display='flex';
+  }
+
+  hintBtn.addEventListener('click',()=>{
+    if(hintLeft>0 && userInput.length<numbers.length){
+      const cell=document.querySelectorAll('.cell')[userInput.length];
+      cell.classList.add('flip'); cell.classList.add('flash');
+      setTimeout(()=>cell.classList.remove('flash'),200);
+      userInput.push(numbers[userInput.length]); score+=5; scoreText.textContent=score;
+      playSound(true); vibrate(50);
+      hintLeft--; hintLeftSpan.textContent=hintLeft;
+      if(userInput.length===numbers.length){ clearInterval(timerInterval); levelComplete(); }
+    } else { vibrate(100); playSound(false); }
+  });
+
+  popupNext.addEventListener('click',()=>{
+    level++; levelText.textContent=level; numbers=[];
+    startLevel();
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Game Ultimate Pro Final</title>
+<style>
+body { font-family: Arial; text-align:center; background:linear-gradient(to bottom,#f0f8ff,#a0d8ef); margin:0; padding:20px; overflow-x:hidden; }
+h2 { margin:10px 0; }
+#grid { display:grid; gap:5px; justify-content:center; margin:20px 0; }
+.cell { width:60px; height:60px; background:#87cefa; display:flex; justify-content:center; align-items:center; font-size:24px; cursor:pointer; border-radius:10px; user-select:none; perspective:600px; transition:transform 0.1s, box-shadow 0.2s; }
+.cell:active { transform: scale(0.95); }
+.cell.flash { box-shadow: 0 0 10px yellow; }
+.cell-inner { width:100%; height:100%; transition: transform 0.5s; transform-style:preserve-3d; position:relative; }
+.cell.flip .cell-inner { transform:rotateY(180deg); }
+.cell-front, .cell-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; display:flex; justify-content:center; align-items:center; border-radius:10px; }
+.cell-front { background:#87cefa; }
+.cell-back { background:#32cd32; color:white; transform:rotateY(180deg); }
+#controls { margin-bottom:10px; font-size:16px; }
+button { padding:5px 10px; font-size:16px; border-radius:5px; border:none; background:#ffa500; color:white; margin-left:5px; }
+.stars { margin-top:10px; font-size:20px; color:gold; }
+#highscore { margin-top:5px; font-size:16px; color:#333; }
+#popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; }
+#popup-content { background:white; padding:20px; border-radius:10px; text-align:center; }
+.confetti { position:absolute; width:10px; height:10px; background:red; pointer-events:none; }
+</style>
+</head>
+<body>
+<h2>Memory Game - Level <span id="level">1</span></h2>
+<div id="grid"></div>
+<div id="controls">
+Score: <span id="score">0</span> | Timer: <span id="timer">0</span>s | Hint left: <span id="hint-left">3</span>
+<button id="hint-btn">Hint</button>
+</div>
+<div id="highscore">High Score: <span id="highscore-val">0</span> | Total: <span id="total-high">0</span></div>
+<div class="stars" id="stars"></div>
+<button id="next-level-btn" style="display:none;">Next Level</button>
+
+<div id="popup">
+  <div id="popup-content">
+    <h3 id="popup-title">Level Complete!</h3>
+    <p>Score: <span id="popup-score">0</span></p>
+    <p>Stars: <span id="popup-stars">★</span></p>
+    <button id="popup-next">Next Level</button>
+    <button id="share-btn">Share Score</button>
+  </div>
+</div>
+
+<audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+<audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+
+<script>
+// Confetti effect
+function createConfetti(){
+  for(let i=0;i<50;i++){
+    const c=document.createElement('div'); c.classList.add('confetti');
+    c.style.left=Math.random()*window.innerWidth+'px';
+    c.style.backgroundColor='hsl('+Math.random()*360+',100%,50%)';
+    document.body.appendChild(c);
+    let top=0; let fall=setInterval(()=>{
+      if(top>window.innerHeight){ c.remove(); clearInterval(fall); return; }
+      top+=Math.random()*5+2; c.style.top=top+'px';
+    },20);
+  }
+}
+
+window.onload=function(){
+  const grid=document.getElementById('grid');
+  const scoreText=document.getElementById('score');
+  const timerText=document.getElementById('timer');
+  const hintBtn=document.getElementById('hint-btn');
+  const nextBtn=document.getElementById('next-level-btn');
+  const levelText=document.getElementById('level');
+  const starsDiv=document.getElementById('stars');
+  const hintLeftSpan=document.getElementById('hint-left');
+  const highscoreVal=document.getElementById('highscore-val');
+  const totalHigh=document.getElementById('total-high');
+  const popup=document.getElementById('popup');
+  const popupScore=document.getElementById('popup-score');
+  const popupStars=document.getElementById('popup-stars');
+  const popupTitle=document.getElementById('popup-title');
+  const popupNext=document.getElementById('popup-next');
+  const shareBtn=document.getElementById('share-btn');
+
+  const correctSound=document.getElementById('correct-sound');
+  const wrongSound=document.getElementById('wrong-sound');
+  const bgMusic=document.getElementById('bg-music'); bgMusic.volume=0.3; bgMusic.play();
+
+  let score=0, level=1, timer=0, timerInterval;
+  let numbers=[], userInput=[], hintLeft=3;
+  let levelTime=30;
+
+  function vibrate(d=50){ if(navigator.vibrate) navigator.vibrate(d); }
+  function playSound(correct=true){ if(correct) correctSound.play(); else wrongSound.play(); }
+  function getHighScore(level){ return parseInt(localStorage.getItem('memory_high_'+level))||0; }
+  function setHighScore(level,score){ localStorage.setItem('memory_high_'+level,score); }
+  function getTotalHigh(){ return parseInt(localStorage.getItem('memory_total_high'))||0; }
+  function setTotalHigh(score){ localStorage.setItem('memory_total_high',score); totalHigh.textContent=score; }
+
+  function startLevel(){
+    grid.innerHTML=''; userInput=[]; numbers=[]; starsDiv.innerHTML=''; popup.style.display='none';
+    hintLeft=3; hintLeftSpan.textContent=hintLeft; levelTime=30+level*5;
+    timer=levelTime; timerText.textContent=timer;
+    let gridSize=2+level; for(let i=1;i<=gridSize*gridSize;i++) numbers.push(i);
+    numbers.sort(()=>Math.random()-0.5); grid.style.gridTemplateColumns=`repeat(${gridSize},60px)`;
+    numbers.forEach(num=>{ const cell=document.createElement('div'); cell.classList.add('cell');
+      cell.innerHTML=`<div class="cell-inner"><div class="cell-front"></div><div class="cell-back">${num}</div></div>`;
+      grid.appendChild(cell);
+    });
+    nextBtn.style.display='none'; scoreText.textContent=score; highscoreVal.textContent=getHighScore(level); totalHigh.textContent=getTotalHigh();
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{
+      timer--; timerText.textContent=timer;
+      if(timer<=0){ clearInterval(timerInterval); levelFail(); }
+    },1000);
+    setTimeout(()=>{document.querySelectorAll('.cell').forEach(c=>c.classList.remove('flip')); addCellEvents();},2000);
+  }
+
+  function addCellEvents(){
+    const cells=document.querySelectorAll('.cell');
+    cells.forEach((cell,index)=>{
+      cell.addEventListener('click',function handler(){
+        if(userInput.length<numbers.length){
+          cell.classList.add('flip'); cell.classList.add('flash'); setTimeout(()=>cell.classList.remove('flash'),200);
+          userInput.push(numbers[index]); score+=10; scoreText.textContent=score;
+          playSound(true); vibrate(30);
+          if(userInput.length===numbers.length){ clearInterval(timerInterval); levelComplete(); }
+        } else { playSound(false); vibrate(100); }
+      },{once:true});
+    });
+  }
+
+  function levelComplete(){
+    let bonus=Math.floor(timer*2); score+=bonus; scoreText.textContent=score;
+    let starCount=Math.min(3,Math.max(1,30-Math.floor((levelTime-timer)/2)));
+    starsDiv.innerHTML='★'.repeat(starCount); popupStars.textContent='★'.repeat(starCount);
+    popupScore.textContent=score; popupTitle.textContent='Level Complete! Bonus: '+bonus;
+    createConfetti();
+    if(score>getHighScore(level)) setHighScore(level,score);
+    if(score>getTotalHigh()) setTotalHigh(score);
+    popup.style.display='flex';
+  }
+
+  function levelFail(){
+    popupTitle.textContent='Time Up! Level Failed'; popupScore.textContent=score; popupStars.textContent='';
+    popup.style.display='flex';
+  }
+
+  hintBtn.addEventListener('click',()=>{
+    if(hintLeft>0 && userInput.length<numbers.length){
+      const cell=document.querySelectorAll('.cell')[userInput.length];
+      cell.classList.add('flip'); cell.classList.add('flash'); setTimeout(()=>cell.classList.remove('flash'),200);
+      userInput.push(numbers[userInput.length]); score+=5; scoreText.textContent=score;
+      playSound(true); vibrate(50);
+      hintLeft--; hintLeftSpan.textContent=hintLeft;
+      if(userInput.length===numbers.length){ clearInterval(timerInterval); levelComplete(); }
+    } else { vibrate(100); playSound(false); }
+  });
+
+  popupNext.addEventListener('click',()=>{
+    level++; levelText.textContent=level; numbers=[];
+    startLevel();
+  });
+
+  shareBtn.addEventListener('click',()=>{
+    if(navigator.share){ navigator.share({title:'Memory Game Score', text:'I scored '+score+' points in Memory Game!'});}
+    else{ alert('Score: '+score+'\nCopy and share manually!'); }
+  });
+
+  startLevel();
+};
+</script>
+</body>
+</html>
