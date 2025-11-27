@@ -1,0 +1,3 @@
+git remote add origin https://github.com/buisnew1233/Ultimate-brain-puzzle.git
+git branch -M main
+git push -u origin main
